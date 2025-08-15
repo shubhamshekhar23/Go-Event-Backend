@@ -25,22 +25,27 @@ go mod tidy
 
 ### API Endpoints
 
-Authentication
+- Authentication
 
+```
 POST /signup - Register a new user
 POST /login - Login and receive a JWT token
+```
 
-Events
+- Events
 
+```
 POST /events - Create a new event (requires authentication)
 GET /events - Retrieve all events
 GET /events/:id - Retrieve a specific event
 PUT /events/:id - Update an event (requires authentication)
 DELETE /events/:id - Delete an event (requires authentication)
 POST /events/:id/register - Register a user to an event (requires authentication)
+```
 
 ### Project Structure
 
+```
 ├── main.go # Entry point of the application
 ├── handlers/ # Request handlers for API endpoints
 ├── models/ # Data models and database schema
@@ -49,6 +54,7 @@ POST /events/:id/register - Register a user to an event (requires authentication
 ├── utils/ # utils for hash password and jwt
 ├── go.mod # Go module dependencies
 └── go.sum # Dependency checksums
+```
 
 ### Dependencies
 
@@ -57,22 +63,23 @@ jwt-go - JWT authentication
 
 ### Usage
 
-Use a tool like Postman or cURL to interact with the API.
-Authenticate using /signup or /login to obtain a JWT token.
-Include the token in the Authorization header (Bearer <token>) for protected routes.
+- Use a tool like Postman or cURL to interact with the API.
+- Authenticate using /signup or /login to obtain a JWT token.
+- Include the token in the Authorization header (Bearer <token>) for protected routes.
 
 ### Example
 
-Signup
-curl -X POST http://localhost:8080/signup -d '{"username":"user","password":"pass"}'
+- Signup `curl -X POST http://localhost:8080/signup -d '{"username":"user","password":"pass"}'`
 
-Login
-curl -X POST http://localhost:8080/login -d '{"username":"user","password":"pass"}'
+- Login `curl -X POST http://localhost:8080/login -d '{"username":"user","password":"pass"}'`
 
-Create Event
+- Create Event
+
+```
 curl -X POST http://localhost:8080/events -H "Authorization: Bearer <token>" -d '{
-"name": "Tech Meetup 3",
-"description": "3 Discuss latest trends in AI and Golang",
-"location": "3 Bangalore Hub",
-"dateTime": "2025-09-05T10:30:00+05:30"
-}'
+  "name": "Tech Meetup 3",
+  "description": "3 Discuss latest trends in AI and Golang",
+  "location": "3 Bangalore Hub",
+  "dateTime": "2025-09-05T10:30:00+05:30"
+  }'
+```
