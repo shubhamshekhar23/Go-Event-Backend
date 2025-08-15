@@ -1,17 +1,15 @@
 package db
 
 func CreateAllTables() error {
-	err1 := createEventsTable()
-	err2 := createUserTable()
-
-	if err1 != nil {
-		return err1
+	if err := createEventsTable(); err != nil {
+		return err
 	}
-
-	if err2 != nil {
-		return err2
+	if err := createUserTable(); err != nil {
+		return err
 	}
-
+	if err := createRegistrationsTable(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -38,6 +36,21 @@ func createUserTable() error {
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			email TEXT NOT NULL UNIQUE,
 			password TEXT NOT NULL
+		);
+	`
+	_, err := DB.Exec(query)
+	return err
+}
+
+/* Create User Table */
+func createRegistrationsTable() error {
+	query := `
+		CREATE TABLE IF NOT EXISTS registrations (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER,
+			event_id INTEGER,
+			FOREIGN KEY(user_id) REFERENCES users(id),
+			FOREIGN KEY(event_id) REFERENCES events(id)
 		);
 	`
 	_, err := DB.Exec(query)
