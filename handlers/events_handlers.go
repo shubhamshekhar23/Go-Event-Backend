@@ -5,11 +5,11 @@ import (
 	"strconv"
 
 	"example.com/go-udemy-api/models"
-	"example.com/go-udemy-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
 func GetEvents(context *gin.Context) {
+	// userId := context.GetInt64("userId")
 	events, err := models.GetAllEvents()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "error in getting events"})
@@ -19,6 +19,7 @@ func GetEvents(context *gin.Context) {
 }
 
 func GetEventsById(context *gin.Context) {
+	// userId := context.GetInt64("userId")
 	idStr := context.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -35,6 +36,7 @@ func GetEventsById(context *gin.Context) {
 }
 
 func SaveEvent(context *gin.Context) {
+	userId := context.GetInt64("userId")
 	var event models.Event
 	err := context.ShouldBindJSON(&event)
 	if err != nil {
@@ -42,26 +44,9 @@ func SaveEvent(context *gin.Context) {
 		return
 	}
 
-	token := context.Request.Header.Get("Authorization")
-	if token == "" {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "not authorized"})
-		return
-	}
-
-	parsedToken, err := utils.VerifyToken(token)
-	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": "invalid token"})
-		return
-	}
-
-	userId, err := utils.ExtractUserID(parsedToken)
-	if err != nil {
-		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
-		return
-	}
 	event.UserID = userId
-
 	eventData, err := event.Save()
+
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -76,6 +61,7 @@ func SaveEvent(context *gin.Context) {
 }
 
 func UpdateEvent(context *gin.Context) {
+	userId := context.GetInt64("userId")
 	idStr := context.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -90,9 +76,14 @@ func UpdateEvent(context *gin.Context) {
 		return
 	}
 
-	_, err3 := models.GetEventById(id)
+	eventDbData, err3 := models.GetEventById(id)
 	if err3 != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Event not found or DB error"})
+		return
+	}
+
+	if eventDbData.UserID != userId {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Event does not belong to this user, Cant Update"})
 		return
 	}
 
@@ -107,6 +98,7 @@ func UpdateEvent(context *gin.Context) {
 }
 
 func DeleteEvent(context *gin.Context) {
+	userId := context.GetInt64("userId")
 	idStr := context.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -114,9 +106,14 @@ func DeleteEvent(context *gin.Context) {
 		return
 	}
 
-	_, err3 := models.GetEventById(id)
+	eventDbData, err3 := models.GetEventById(id)
 	if err3 != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Event not found or DB error"})
+		return
+	}
+
+	if eventDbData.UserID != userId {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Event does not belong to this user, Can't Delete"})
 		return
 	}
 

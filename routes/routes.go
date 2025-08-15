@@ -2,16 +2,19 @@ package routes
 
 import (
 	"example.com/go-udemy-api/handlers"
+	"example.com/go-udemy-api/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterRoutes(server *gin.Engine) {
-	/* Events related */
-	server.GET("/events", handlers.GetEvents)
-	server.GET("/events/:id", handlers.GetEventsById)
-	server.PUT("/events/:id", handlers.UpdateEvent)
-	server.DELETE("/events/:id", handlers.DeleteEvent)
-	server.POST("/events", handlers.SaveEvent)
+	/* Events related Protected Routes */
+	protected := server.Group("/")
+	protected.Use(middlewares.Authenticate)
+	protected.GET("/events", handlers.GetEvents)
+	protected.GET("/events/:id", handlers.GetEventsById)
+	protected.PUT("/events/:id", handlers.UpdateEvent)
+	protected.DELETE("/events/:id", handlers.DeleteEvent)
+	protected.POST("/events", handlers.SaveEvent)
 
 	/* User Related */
 	server.GET("/users", handlers.GetUsers)
