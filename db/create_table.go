@@ -1,11 +1,15 @@
 package db
 
 func CreateAllTables() error {
-	err := createEventsTable()
-	err = createUserTable()
+	err1 := createEventsTable()
+	err2 := createUserTable()
 
-	if err != nil {
-		return err
+	if err1 != nil {
+		return err1
+	}
+
+	if err2 != nil {
+		return err2
 	}
 
 	return nil
@@ -20,7 +24,7 @@ func createEventsTable() error {
 		description TEXT NOT NULL,
 		location TEXT NOT NULL,
 		date_time DATETIME NOT NULL,
-		user_id INTEGER
+		user_id INTEGER,
 		FOREIGN KEY(user_id) REFERENCES users(id)
 	);`
 	_, err := DB.Exec(query)

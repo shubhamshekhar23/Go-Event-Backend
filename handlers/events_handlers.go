@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"example.com/go-udemy-api/models"
+	"example.com/go-udemy-api/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,10 +42,29 @@ func SaveEvent(context *gin.Context) {
 		return
 	}
 
+	token := context.Request.Header.Get("Authorization")
+	if token == "" {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "not authorized"})
+		return
+	}
+
+	parsedToken, err := utils.VerifyToken(token)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": "invalid token"})
+		return
+	}
+
+	userId, err := utils.ExtractUserID(parsedToken)
+	if err != nil {
+		context.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
+		return
+	}
+	event.UserID = userId
+
 	eventData, err := event.Save()
 	if err != nil {
-		context.JSON(http.StatusNotModified, gin.H{
-			"error": "error in saving event",
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
 		})
 		return
 	}

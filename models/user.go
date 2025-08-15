@@ -1,6 +1,9 @@
 package models
 
 import (
+	"database/sql"
+	"errors"
+
 	"example.com/go-udemy-api/db"
 	"example.com/go-udemy-api/utils"
 )
@@ -52,4 +55,26 @@ func GetAllUsers() ([]User, error) {
 	}
 
 	return users, nil
+}
+
+func (u User) ValidateCredentials() (User, error) {
+	query := `
+		SELECT * from users WHERE email = ?
+	`
+	var user User
+	var hashedPassword string
+	row := db.DB.QueryRow(query, u.Email)
+	err := row.Scan(&user.ID, &user.Email, &hashedPassword)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return User{}, err
+		}
+		return User{}, err
+	}
+
+	if !utils.CheckHashPassword(u.Password, hashedPassword) {
+		return user, errors.New("invalid email or password")
+	}
+	return user, nil
 }
